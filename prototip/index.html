@@ -1,0 +1,749 @@
+<!doctype html>
+<html lang="sl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>FuelMe Terensko</title>
+<style>
+:root {
+  color-scheme:dark;
+  --ink:#fff;
+  --muted:#bdb1a8;
+  --paper:#151311;
+  --ground:#080808;
+  --line:#433830;
+  --field:#827469;
+  --accent:#e8621a;
+  --accent-text:#ff9c65;
+  --on-accent:#151311;
+  --hover:#221b16;
+  --pressed:#2d2119;
+  --error:#ffaea0;
+  --cabinet:#211a15;
+  --cabinet-well:#110e0c;
+  --shelf:#4a392d;
+  --slot:#2d241e;
+  --slot-hover:#413125;
+  --fill-empty:#68594f;
+  --fill-stock:#cfa487;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  background:var(--ground);
+  color:var(--ink);
+  font:0.9375rem/1.5 "Segoe UI",system-ui,sans-serif;
+}
+button, input, select { font:inherit; color:inherit; }
+button { cursor:pointer; }
+input { caret-color:var(--accent-text); }
+::selection { color:var(--on-accent); background:var(--accent-text); }
+:where(button,input,select):focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
+h1, h2, p { margin:0; }
+[hidden] { display:none!important; }
+h1 {
+  font-size:2rem;
+  font-weight:650;
+  line-height:1.18;
+  letter-spacing:-.028em;
+  overflow-wrap:anywhere;
+}
+h2 { font-size:1.0625rem; font-weight:650; line-height:1.35; letter-spacing:-.012em; }
+.icon { width:18px; height:18px; display:inline-block; flex:none; vertical-align:middle; }
+.quiet { color:var(--muted); font-size:.8125rem; }
+.sr {
+  position:absolute;
+  overflow:hidden;
+  clip-path:inset(50%);
+  width:1px;
+  height:1px;
+  white-space:nowrap;
+}
+.wrap { width:min(960px,calc(100% - 64px)); margin-inline:auto; }
+.top { background:var(--paper); border-bottom:1px solid var(--line); }
+.top-inner {
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  gap:28px;
+  min-height:61px;
+  align-items:center;
+}
+.brand { display:flex; align-items:center; gap:8px; }
+.mark {
+  display:grid;
+  width:32px;
+  height:32px;
+  place-items:center;
+  background:var(--accent);
+  color:var(--on-accent);
+  border-radius:7px;
+}
+.brand strong { display:block; font-size:1.0625rem; font-weight:700; line-height:1.15; letter-spacing:-.025em; }
+.brand small { display:block; color:var(--muted); font-size:.6875rem; line-height:1.25; }
+.nav { display:flex; align-self:stretch; gap:20px; }
+.nav button {
+  border:0;
+  border-bottom:2px solid transparent;
+  padding:0 3px;
+  min-height:44px;
+  background:transparent;
+  color:var(--muted);
+  font-size:.875rem;
+  font-weight:600;
+}
+.nav button[aria-current=page] { border-color:var(--accent); color:var(--ink); }
+.account {
+  grid-column:3;
+  background:transparent;
+  border:0;
+  border-radius:6px;
+  min-height:44px;
+  padding:5px 8px;
+  color:var(--muted);
+  font-size:.8125rem;
+  font-weight:600;
+}
+.account:hover,.back:hover { background:var(--hover); }
+.nav button:hover { color:var(--accent-text); }
+main.wrap { padding-block:31px 15px; }
+.intro { margin-bottom:21px; }
+.intro p { margin-top:5px; color:var(--muted); font-size:.875rem; }
+footer.wrap { padding-block:4px 19px; color:var(--muted); font-size:.75rem; }
+body:has(.login) footer.wrap { max-width:410px; }
+.headrow { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+.back {
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  min-height:44px;
+  margin:-10px 0 5px -7px;
+  padding:0 7px;
+  background:transparent;
+  border:0;
+  border-radius:6px;
+  color:var(--accent-text);
+  font-size:.875rem;
+  font-weight:600;
+}
+.back .icon { width:16px; }
+.primary, .plain {
+  min-height:44px;
+  padding:8px 13px;
+  border-radius:6px;
+  font-size:.875rem;
+  font-weight:650;
+  line-height:1.25;
+}
+.primary {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  background:var(--accent);
+  border:1px solid var(--accent);
+  color:var(--on-accent);
+}
+.primary:hover { background:#f77c37; }
+.primary:active { background:#ed6b24; }
+.plain { background:var(--paper); border:1px solid var(--field); }
+.plain:hover { background:var(--hover); }
+.plain:active { background:var(--pressed); }
+.full { width:100%; }
+.field { display:block; font-size:.8125rem; font-weight:600; }
+.field input, .field select {
+  display:block;
+  width:100%;
+  min-height:44px;
+  margin-top:4px;
+  padding:8px 10px;
+  background:var(--paper);
+  border:1px solid var(--field);
+  border-radius:6px;
+  font-size:1rem;
+  font-weight:400;
+}
+.field select { font-size:.875rem; }
+.field input::placeholder { color:var(--muted); }
+.field input[aria-invalid=true] { border-color:var(--error); }
+.error {
+  padding:7px 9px;
+  background:#321d18;
+  border-radius:5px;
+  color:var(--error);
+  font-size:.8125rem;
+}
+.error:empty { display:none; }
+
+.login {
+  max-width:410px;
+  margin:17px auto 5px;
+  padding:23px 25px;
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:12px;
+}
+.login .intro { margin-bottom:19px; }
+.login-form { display:grid; gap:13px; }
+.login-form .primary { margin-top:2px; }
+.login-demo { border-top:1px solid var(--line); margin-top:19px; padding-top:12px; }
+.login-demo .plain { font-size:.8125rem; }
+
+.location-list { max-width:650px; }
+.search { max-width:420px; margin-bottom:18px; }
+.machine-list { border-block:1px solid var(--line); }
+.machine {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto auto;
+  width:100%;
+  min-height:78px;
+  align-items:center;
+  gap:12px;
+  padding:9px 9px 9px 0;
+  background:transparent;
+  border:0;
+  text-align:left;
+}
+.machine + .machine { border-top:1px solid var(--line); }
+.machine:active { background:var(--pressed); }
+.machine strong { display:block; font-size:.9375rem; font-weight:650; }
+.machine small { display:block; color:var(--muted); font-size:.75rem; }
+.machine .meta { display:flex; flex-wrap:wrap; gap:0 8px; margin-top:2px; }
+.machine .meta span:last-child { white-space:nowrap; }
+.machine .machine-code { color:var(--muted); font-size:.75rem; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.machine .icon { width:15px; color:var(--accent-text); }
+.empty { padding:11px 0; color:var(--muted); }
+
+.sales-filters { display:flex; align-items:end; flex-wrap:wrap; gap:12px; margin-bottom:19px; }
+.sales-filters .field { width:min(100%,211px); }
+.period-label { display:block; margin-bottom:4px; font-size:.8125rem; font-weight:600; }
+.segmented {
+  display:flex;
+  gap:3px;
+  min-height:44px;
+  padding:3px;
+  border:1px solid var(--line);
+  border-radius:7px;
+  background:var(--paper);
+}
+.segmented button {
+  min-width:55px;
+  border:0;
+  border-radius:4px;
+  padding-inline:7px;
+  background:transparent;
+  color:var(--muted);
+  font-size:.8125rem;
+  font-weight:650;
+}
+.segmented button[aria-pressed=true] { background:var(--accent); color:var(--on-accent); }
+.segmented button:hover:not([aria-pressed=true]) { background:var(--hover); }
+.sales-results { display:grid; grid-template-columns:minmax(0,1.75fr) minmax(0,1fr); gap:16px 25px; }
+.metrics {
+  grid-column:1 / -1;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  border-block:1px solid var(--line);
+}
+.metric { padding:10px 0 12px; min-width:0; }
+.metric + .metric { border-left:1px solid var(--line); padding-left:18px; }
+.metric span { display:block; color:var(--muted); font-size:.8125rem; font-weight:600; }
+.metric strong {
+  display:block;
+  margin-top:2px;
+  font-size:1.5rem;
+  font-weight:650;
+  line-height:1.25;
+  letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums;
+  overflow-wrap:anywhere;
+}
+.report-section { padding-top:2px; }
+.chart {
+  position:relative;
+  isolation:isolate;
+  display:grid;
+  grid-template-columns:repeat(var(--bars),minmax(0,1fr));
+  gap:6px;
+  height:159px;
+  margin-top:10px;
+}
+.chart::before {
+  content:"";
+  position:absolute;
+  z-index:-1;
+  inset:0 0 21px;
+  border-bottom:1px solid var(--line);
+  background:repeating-linear-gradient(to top,transparent 0 calc(25% - 1px),var(--line) calc(25% - 1px) 25%);
+}
+.chart-column { display:grid; grid-template-rows:minmax(0,1fr) 21px; min-width:0; text-align:center; }
+.chart-track { display:flex; flex-direction:column; align-items:center; justify-content:flex-end; min-height:0; }
+.chart-track b { display:block; height:var(--bar-height); width:min(77%,48px); min-height:2px; border-radius:2px 2px 0 0; background:var(--accent); }
+.chart-track span { font-size:.6875rem; font-weight:600; font-variant-numeric:tabular-nums; }
+.chart-column small { align-self:end; color:var(--muted); font-size:.6875rem; white-space:nowrap; }
+.leaderboard { list-style:none; margin:10px 0 0; padding:0; border-bottom:1px solid var(--line); }
+.leaderboard li {
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  padding:9px 0;
+  border-top:1px solid var(--line);
+  font-size:.8125rem;
+}
+.leaderboard strong { font-weight:600; white-space:nowrap; font-variant-numeric:tabular-nums; }
+
+.stock-card { max-width:640px; }
+.stock-heading { align-items:baseline; margin-bottom:9px; }
+.stock-heading p { text-align:right; }
+.rack { padding:9px 10px 8px; background:var(--cabinet); color:var(--ink); border-radius:9px; }
+.rack-title {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:7px;
+  margin-bottom:7px;
+  color:var(--muted);
+  font-size:.75rem;
+}
+.rack-title strong { font-weight:650; color:var(--ink); }
+.rack-grid { display:grid; gap:4px; padding:4px; background:var(--cabinet-well); border-radius:5px; }
+.rack-shelf {
+  display:grid;
+  grid-template-columns:16px repeat(6,minmax(0,1fr));
+  gap:4px;
+  padding-bottom:3px;
+  border-bottom:1px solid var(--shelf);
+}
+.rack-shelf:last-child { border-bottom:0; padding-bottom:0; }
+.shelf-letter { align-self:center; text-align:center; color:var(--muted); font-size:.6875rem; font-weight:650; }
+.slot {
+  position:relative;
+  display:grid;
+  align-content:center;
+  gap:3px;
+  min-width:0;
+  min-height:49px;
+  padding:4px 5px;
+  background:var(--slot);
+  border:1px solid transparent;
+  border-radius:3px;
+  color:var(--ink);
+  text-align:center;
+}
+.slot:active { background:var(--slot-hover); }
+.slot:focus-visible { outline:2px solid var(--accent-text); outline-offset:1px; z-index:1; }
+.slot.recorded { border-color:var(--accent); background:var(--slot-hover); }
+.slot-code { color:var(--muted); font-size:.6875rem; font-weight:600; line-height:1; }
+.slot strong { font-size:.8125rem; font-weight:650; line-height:1.1; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.slot-marker { position:absolute; top:1px; right:2px; color:var(--accent-text); }
+.slot-marker .icon { width:11px; height:11px; }
+.fill { display:grid; grid-template-columns:repeat(10,minmax(0,1fr)); gap:1px; height:4px; }
+.fill i { background:var(--fill-empty); border-radius:1px; }
+.fill i.occupied { background:var(--fill-stock); }
+.slot.low .fill i.occupied { background:var(--accent); }
+.rack-outlet { width:34%; height:6px; margin:7px auto 0; background:var(--cabinet-well); border-radius:3px; }
+.rack-help { margin-top:8px; color:var(--muted); font-size:.8125rem; }
+.visit-actions {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:8px;
+  border-top:1px solid var(--line);
+  padding-top:11px;
+  margin-top:10px;
+}
+.tag,.focus-good { color:var(--accent-text); font-size:.8125rem; font-weight:600; }
+.focus-good { margin-top:12px; }
+
+.spiral-dialog {
+  width:min(392px,calc(100% - 28px));
+  max-height:calc(100% - 28px);
+  overflow:auto;
+  margin:auto;
+  padding:17px 19px;
+  background:var(--paper);
+  border:0;
+  border-radius:12px;
+  color:var(--ink);
+  box-shadow:0 12px 34px #000a;
+}
+.spiral-dialog::backdrop { background:#0009; }
+.spiral-dialog h2 { margin:3px 0 0; font-size:1.1875rem; }
+.dialog-close {
+  display:grid;
+  min-width:44px;
+  min-height:44px;
+  place-items:center;
+  margin:-7px -6px -5px 0;
+  background:transparent;
+  border:0;
+  border-radius:6px;
+}
+.dialog-close:hover { background:var(--hover); }
+.dialog-product { display:flex; align-items:center; gap:9px; margin:9px 0 10px; }
+.dialog-product .tile { display:grid; place-items:center; width:34px; height:34px; background:var(--slot); border-radius:5px; flex:none; }
+.dialog-product strong { display:block; font-size:.9375rem; font-weight:650; }
+.dialog-product p { color:var(--muted); font-size:.8125rem; }
+.product-icon { position:relative; width:15px; height:12px; background:var(--packaging); border-radius:2px; }
+.product-icon::before { content:""; position:absolute; inset:4px 0 auto; height:2px; background:#fff9; }
+.product-icon.bottle { width:10px; height:14px; border-radius:3px 3px 2px 2px; }
+.product-icon.bottle::after { content:""; position:absolute; width:6px; height:3px; left:2px; top:-2px; border-radius:1px; background:var(--packaging); }
+.product-icon.can { width:11px; height:13px; }
+.dialog-fill { height:7px; gap:3px; margin-bottom:12px; }
+.dialog-fill i.occupied { background:var(--accent); }
+.custom-quantity { padding-top:10px; margin-top:11px; border-top:1px solid var(--line); }
+.custom-quantity .error { margin-top:6px; }
+.custom-row { display:flex; align-items:end; gap:8px; }
+.custom-row .field { flex:1; min-width:0; }
+.custom-row .plain { padding-inline:8px; }
+
+@media(hover:hover) {
+  .machine:hover { background:var(--hover); }
+  .slot:hover { background:var(--slot-hover); }
+}
+@media(max-width:730px) {
+  .wrap { width:calc(100% - 32px); }
+  .top-inner { grid-template-columns:1fr auto; gap:0 8px; min-height:53px; padding-top:3px; }
+  .brand { min-height:48px; }
+  .nav { grid-column:1/-1; grid-row:2; gap:17px; border-top:1px solid var(--line); }
+  .nav button { min-height:42px; }
+  .account { grid-column:2; grid-row:1; }
+  main.wrap { padding-top:21px; }
+  h1 { font-size:1.6875rem; }
+  .intro { margin-bottom:16px; }
+  .login { margin-top:4px; padding:17px; }
+  .sales-filters { gap:9px; margin-bottom:14px; }
+  .sales-filters .field { flex:1; min-width:123px; }
+  .sales-results { grid-template-columns:minmax(0,1fr); gap:12px; }
+  .chart { gap:3px; height:127px; }
+  .rack { padding-inline:6px; }
+  .rack-shelf { grid-template-columns:11px repeat(6,minmax(0,1fr)); gap:3px; }
+  .slot { min-height:46px; padding-inline:2px; }
+  .slot strong { font-size:.75rem; }
+  .spiral-dialog { margin:auto auto 9px; padding:16px; }
+}
+@media(max-width:350px) {
+  .wrap { width:calc(100% - 24px); }
+  .machine { gap:7px; padding-right:4px; }
+  .rack-grid { padding:3px; }
+  .slot strong { font-size:.6875rem; }
+  .slot-marker .icon { width:8px; height:8px; }
+  .chart-column small { font-size:.625rem; }
+}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap top-inner">
+  <div class="brand"><div class="mark" id="mark"></div><div><strong>FuelMe</strong><small>Terensko</small></div></div>
+  <nav class="nav" id="navigation" aria-label="Glavna navigacija">
+    <button type="button" data-action="locations" id="nav-locations">Lokacije</button><button type="button" data-action="sales" id="nav-sales">Prodaja</button>
+  </nav>
+  <button type="button" class="account" data-action="login" id="account"></button>
+</div></header>
+<main class="wrap" id="app"></main>
+<footer class="wrap">Vzorčni podatki. Osvežitev ponastavi vnos.</footer>
+<p class="sr" role="status" id="status"></p>
+<dialog class="spiral-dialog" id="spiral-dialog" aria-labelledby="spiral-title"></dialog>
+<script>
+"use strict";
+const symbols = {
+  machine:'<rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M8 7h8M8 11h8m-8 4h8m-6 3h4"/>',
+  chevron:'<path d="m9 6 6 6-6 6"/>',
+  back:'<path d="M20 12H5m6-6-6 6 6 6"/>',
+  check:'<path d="m5 12 4 4 10-10"/>',
+  close:'<path d="m6 6 12 12M18 6 6 18"/>'
+};
+const icon = name => '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+symbols[name]+'</svg>';
+const app = document.querySelector("#app");
+const account = document.querySelector("#account");
+const navigation = document.querySelector("#navigation");
+const status = document.querySelector("#status");
+const spiralDialog = document.querySelector("#spiral-dialog");
+const navLocations = document.querySelector("#nav-locations");
+const navSales = document.querySelector("#nav-sales");
+document.querySelector("#mark").innerHTML = icon("machine");
+
+const shelves = ["A","B","C","D","E","F"];
+const capacity = 10;
+const products = [
+  {product:"Voda 0,5 l",shape:"bottle",color:"#9accdc"},
+  {product:"Izotonik",shape:"bottle",color:"#eac970"},
+  {product:"Beljakovinska ploščica",shape:"pack",color:"#afcbaa"},
+  {product:"Ledeni čaj",shape:"can",color:"#d4a38e"},
+  {product:"Ovsena ploščica",shape:"pack",color:"#c6a6d2"},
+  {product:"Mineralna voda",shape:"bottle",color:"#a4c0e1"},
+  {product:"Sadni sok",shape:"can",color:"#eea988"},
+  {product:"Mešanica oreščkov",shape:"pack",color:"#dfca93"},
+  {product:"Krekerji",shape:"pack",color:"#b5cfe8"},
+  {product:"Koruzni prigrizek",shape:"pack",color:"#e3b695"},
+  {product:"Proteinski napitek",shape:"bottle",color:"#b5c0af"},
+  {product:"Čokoladni vafelj",shape:"pack",color:"#c2a287"}
+];
+function makeSlots(machineIndex, firstSlots) {
+  return shelves.flatMap((shelf,row)=>Array.from({length:6},(_,column)=>{
+    const index = row*6+column;
+    const seed = (index*7+row+machineIndex*3)%products.length;
+    const [productIndex,stock] = firstSlots[index] || [seed,(seed+index*3)%(capacity+1)];
+    return {id:shelf+(column+1),...products[productIndex],stock};
+  }));
+}
+const machines = [
+  {id:"FM-01",name:"Športni center",location:"Ljubljana · vhod A",checked:"18. 11. 2026 ob 14:25",slots:makeSlots(0,[[0,4],[1,7],[2,2]])},
+  {id:"FM-02",name:"Poslovna stavba",location:"Ljubljana · pritličje",checked:"17. 11. 2026 ob 09:10",slots:makeSlots(1,[[0,8],[3,5],[4,9]])},
+  {id:"FM-03",name:"Študentski dom",location:"Ljubljana · avla",checked:"16. 11. 2026 ob 12:30",slots:makeSlots(2,[[5,9],[6,2],[7,5]])}
+];
+const demoAccount = {email:"demo@fuelme.test",password:"fuelme-demo",name:"Vzorčni uporabnik"};
+const visits = machines.map((machine,index) => ({
+  id:240-index,machine:machine.id,time:machine.checked,worker:demoAccount.name,
+  lines:machine.slots.map(slot => ({...slot,recorded:true}))
+}));
+const drafts = new Map();
+const salesDates = Array.from({length:30},(_,index)=>new Date(Date.UTC(2026,10,19-29+index,12)));
+const trend = [9,12,10,15,13,8,7,8,16,10,18,14,9,8,10,18,13,19,11,10,10,13,15,11,18,9,12,16,12,20];
+const salePrices = {
+  "Voda 0,5 l":150,"Izotonik":240,"Beljakovinska ploščica":290,"Ledeni čaj":190,"Ovsena ploščica":170,
+  "Mineralna voda":160,"Sadni sok":220,"Mešanica oreščkov":280
+};
+const sales = salesDates.flatMap((date,day)=>machines.flatMap((item,locationIndex)=>item.slots.slice(0,3).map((slot,productIndex)=>{
+  const units = Math.max(0,Math.round((trend[day]+(day*3+locationIndex*7+productIndex*5)%9-4)/(2+productIndex*.65)+locationIndex));
+  return {day, machine:item.id, product:slot.product, units, cents:units*salePrices[slot.product]};
+})));
+const money = new Intl.NumberFormat("sl-SI",{style:"currency",currency:"EUR"});
+const whole = new Intl.NumberFormat("sl-SI");
+const dayLabel = new Intl.DateTimeFormat("sl-SI",{day:"numeric",month:"numeric",timeZone:"UTC"});
+let view = "login";
+let machine = machines[0];
+let activeSpiral = null;
+let savedMachine = null;
+let search = "";
+let period = 7;
+let saleLocation = "";
+const esc = value => String(value).replace(/[&<>"']/g,char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[char]);
+const locate = id => machines.find(item=>item.id===id);
+const pageTitle = (title,detail) => '<div class="intro"><h1 id="title" tabindex="-1">'+title+'</h1>'+(detail?'<p>'+detail+'</p>':"")+'</div>';
+const back = (label,action) => '<button class="back" type="button" data-action="'+action+'">'+icon("back")+label+'</button>';
+const countRecorded = visit => visit.lines.filter(slot=>slot.recorded).length;
+const productIcon = slot => '<span class="product-icon '+slot.shape+'" style="--packaging:'+slot.color+'" aria-hidden="true"></span>';
+function capacityStrip(quantity,extraClass="") {
+  return '<span class="fill'+extraClass+'" aria-hidden="true">'+
+    Array.from({length:capacity},(_,index)=>index<quantity?'<i class="occupied"></i>':'<i></i>').join("")+'</span>';
+}
+function slotMarkup(slot,entry) {
+  const quantity = entry?.quantity ?? slot.stock;
+  const recorded = Boolean(entry);
+  const label = "Spirala "+slot.id+", "+quantity+" od "+capacity+" kosov"+(recorded?", potrjena":"");
+  return '<button type="button" data-grid-slot="'+slot.id+'" aria-haspopup="dialog" class="slot'+(quantity<=3?" low":"")+(recorded?" recorded":"")+
+    '" aria-label="'+label+'" title="'+label+'"><span class="slot-code">'+slot.id+'</span>'+
+    '<strong>'+quantity+'/'+capacity+'</strong>'+capacityStrip(quantity)+
+    (recorded?'<span class="slot-marker" aria-hidden="true">'+icon("check")+'</span>':"")+'</button>';
+}
+function rack(item,draft) {
+  return '<section class="rack" aria-label="Avtomat '+item.id+', 36 spiral s po 10 mesti"><div class="rack-title"><strong>'+item.id+'</strong><span>'+item.slots.length+' spiral · po '+capacity+' mest</span></div><div class="rack-grid">'+
+    shelves.map(shelf=>'<div class="rack-shelf" role="group" aria-label="Polica '+shelf+'"><span class="shelf-letter" aria-hidden="true">'+shelf+'</span>'+
+      item.slots.filter(slot=>slot.id.startsWith(shelf)).map(slot=>slotMarkup(slot,draft?.get(slot.id))).join("")+'</div>').join("")+'</div><div class="rack-outlet" aria-hidden="true"></div></section>';
+}
+function locationList() {
+  const query = search.toLocaleLowerCase("sl").trim();
+  const list = machines.filter(item=>[item.id,item.name,item.location].join(" ").toLocaleLowerCase("sl").includes(query));
+  if (!list.length) return '<p class="empty">Ni zadetkov. Poskusite z nazivom, krajem ali oznako avtomata.</p>';
+  return list.map(item=>{
+    const last = visits.find(visit=>visit.machine===item.id);
+    return '<button type="button" class="machine" data-machine="'+item.id+'"><span><strong>'+item.name+'</strong><small>'+item.location+'</small>'+
+      '<small class="meta"><span>Zadnji obisk: '+last.time+'</span><span>potrjene spirale: '+countRecorded(last)+'</span></small></span><span class="machine-code">'+item.id+'</span>'+icon("chevron")+'</button>';
+  }).join("");
+}
+function locationsView() {
+  return pageTitle("Lokacije")+
+    '<section class="location-list"><label class="field search">Poišči lokacijo ali avtomat<input id="search" type="search" value="'+esc(search)+'" placeholder="Npr. Športni center ali FM-01"></label><div class="machine-list" id="machine-list">'+locationList()+'</div></section>';
+}
+function detailView() {
+  const draft = drafts.get(machine.id);
+  const action = draft?.size
+    ? '<div class="visit-actions"><span class="tag">Potrjene spirale: '+draft.size+'</span><button class="primary" type="button" data-action="save">Zaključi obisk'+icon("check")+'</button></div>'
+    : savedMachine===machine.id ? '<p class="focus-good" tabindex="-1">'+icon("check")+' Obisk shranjen.</p>' : "";
+  return back("Lokacije","locations")+pageTitle(machine.name,machine.location)+
+    '<section class="stock-card"><div class="headrow stock-heading"><h2>Zaloga</h2><p class="quiet">Zadnji obisk: '+machine.checked+'</p></div>'+
+    rack(machine,draft)+'<p class="rack-help">Izberi spiralo za vnos količine.</p>'+action+'</section>';
+}
+function summarizeSales() {
+  const start = salesDates.length-period;
+  const bucketSize = period===7 ? 1 : 5;
+  const bins = Array.from({length:Math.ceil(period/bucketSize)},(_,index)=>{
+    const first = dayLabel.format(salesDates[start+index*bucketSize]);
+    const last = dayLabel.format(salesDates[start+(index+1)*bucketSize-1]);
+    return {label:first.replace(/\s/g,""),range:bucketSize===1 ? first : first+"–"+last,units:0};
+  });
+  const products = new Map();
+  let units = 0;
+  let cents = 0;
+  for (const sale of sales) {
+    if (sale.day<start || (saleLocation && sale.machine!==saleLocation)) continue;
+    units += sale.units;
+    cents += sale.cents;
+    bins[Math.floor((sale.day-start)/bucketSize)].units += sale.units;
+    products.set(sale.product,(products.get(sale.product) || 0)+sale.units);
+  }
+  const top = [...products].sort((a,b)=>b[1]-a[1] || a[0].localeCompare(b[0],"sl")).slice(0,3);
+  return {units,cents,bins,top};
+}
+function salesReport() {
+  const report = summarizeSales();
+  const label = period===7 ? "Prodani kosi po dnevih" : "Prodani kosi po petdnevnih obdobjih";
+  const max = Math.max(1,...report.bins.map(bin=>bin.units));
+  const description = label+". "+report.bins.map(bin=>bin.range+": "+bin.units).join(", ")+".";
+  return '<div class="metrics"><div class="metric"><span>Prihodek</span><strong data-metric="revenue">'+money.format(report.cents/100)+'</strong></div>'+
+    '<div class="metric"><span>Prodani kosi</span><strong data-metric="units">'+whole.format(report.units)+'</strong></div></div>'+
+    '<section class="report-section"><h2>'+label+'</h2><div class="chart" style="--bars:'+report.bins.length+'" role="img" aria-label="'+description+'">'+
+    report.bins.map(bin=>'<div class="chart-column" title="'+bin.range+': '+bin.units+' kosov"><div class="chart-track"><span>'+bin.units+'</span><b style="--bar-height:'+(bin.units/max*84)+'%"></b></div><small>'+bin.label+'</small></div>').join("")+'</div></section>'+
+    '<section class="report-section"><h2>Najbolj prodajani izdelki</h2><ol class="leaderboard">'+report.top.map(([product,units])=>'<li><span>'+product+'</span><strong>'+whole.format(units)+' kos</strong></li>').join("")+'</ol></section>';
+}
+function salesView() {
+  const options = machines.map(item=>'<option value="'+item.id+'"'+(saleLocation===item.id?" selected":"")+'>'+item.name+'</option>').join("");
+  const periods = [7,30].map(days=>'<button type="button" data-period="'+days+'" aria-pressed="'+(days===period)+'">'+days+' dni</button>').join("");
+  return pageTitle("Analitika prodaje","Vzorčna prodaja do 19. 11. 2026.")+
+    '<div class="sales-filters"><div><span class="period-label" id="period-label">Obdobje</span><div class="segmented" role="group" aria-labelledby="period-label">'+periods+'</div></div>'+
+    '<div class="field"><label for="sales-location">Lokacija</label><select id="sales-location"><option value="">Vse lokacije</option>'+options+'</select></div></div><div class="sales-results" id="sales-results">'+salesReport()+'</div>';
+}
+function loginView() {
+  return '<section class="login">'+pageTitle("Prijava")+
+    '<form id="login-form" class="login-form" novalidate><label class="field">E-pošta<input type="email" name="email" autocomplete="username" required></label>'+
+    '<label class="field">Geslo<input type="password" name="password" autocomplete="current-password" required></label><p id="login-error" class="error" role="alert"></p>'+
+    '<button class="primary full" type="submit">Prijavi se</button></form>'+
+    '<div class="login-demo"><button class="plain full" type="button" data-action="demo">Vstopi z vzorčnim računom</button></div></section>';
+}
+const pages = {login:loginView,locations:locationsView,sales:salesView,detail:detailView};
+function render(focus = false) {
+  navigation.hidden = view==="login";
+  account.hidden = view==="login";
+  account.textContent = "Odjava";
+  navLocations.removeAttribute("aria-current");
+  navSales.removeAttribute("aria-current");
+  (view==="sales"?navSales:navLocations).setAttribute("aria-current","page");
+  app.innerHTML = pages[view]();
+  if (focus) {
+    window.scrollTo(0,0);
+    document.querySelector("#title").focus({preventScroll:true});
+  }
+}
+function navigate(next) {
+  view = next;
+  render(true);
+}
+function openSpiral(id) {
+  const slot = machine.slots.find(item=>item.id===id);
+  const entry = drafts.get(machine.id)?.get(id);
+  const quantity = entry?.quantity ?? slot.stock;
+  activeSpiral = slot;
+  const controls = '<button class="primary full" type="button" data-action="full">Potrdi polno</button>'+
+    '<form class="custom-quantity" id="quantity-form" novalidate><div class="custom-row"><label class="field">Količina po polnjenju<input id="quantity" name="quantity" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="0–'+capacity+'" aria-describedby="quantity-error"></label>'+
+    '<button type="submit" class="plain">Potrdi količino</button></div><p id="quantity-error" class="error" role="alert"></p></form>';
+  spiralDialog.innerHTML = '<div class="headrow"><h2 id="spiral-title">Spirala '+id+'</h2><button type="button" class="dialog-close" data-action="close-spiral" aria-label="Zapri" autofocus>'+icon("close")+'</button></div>'+
+    '<div class="dialog-product"><span class="tile">'+productIcon(slot)+'</span><div><strong>'+slot.product+'</strong><p>Zaloga: '+quantity+' od '+capacity+' kosov</p></div></div>'+capacityStrip(quantity," dialog-fill")+controls;
+  spiralDialog.showModal();
+}
+function setQuantity(quantity,mode) {
+  if (view!=="detail" || !spiralDialog.open || !activeSpiral) return;
+  const id = activeSpiral.id;
+  if (!drafts.has(machine.id)) drafts.set(machine.id,new Map());
+  drafts.get(machine.id).set(id,{quantity,mode});
+  savedMachine = null;
+  spiralDialog.close();
+  render();
+  app.querySelector('[data-grid-slot="'+id+'"]').focus({preventScroll:true});
+  status.textContent = "Spirala "+id+" je potrjena: "+quantity+" kosov.";
+}
+function save() {
+  const draft = drafts.get(machine.id);
+  if (view!=="detail" || !draft?.size) return;
+  const time = new Intl.DateTimeFormat("sl-SI",{dateStyle:"medium",timeStyle:"short"}).format(new Date());
+  const lines = machine.slots.map(slot=>{
+    const entry = draft.get(slot.id);
+    return {...slot,before:slot.stock,stock:entry?.quantity ?? slot.stock,recorded:Boolean(entry),mode:entry?.mode};
+  });
+  visits.unshift({id:visits[0].id+1,machine:machine.id,time,worker:demoAccount.name,lines});
+  for (const slot of machine.slots) {
+    const entry = draft.get(slot.id);
+    if (entry) slot.stock = entry.quantity;
+  }
+  machine.checked = time;
+  drafts.delete(machine.id);
+  savedMachine = machine.id;
+  render();
+  app.querySelector(".focus-good").focus({preventScroll:true});
+  status.textContent = "Obisk je shranjen.";
+}
+document.addEventListener("click",event=>{
+  const button = event.target.closest("button");
+  if (!button) return;
+  if (button.dataset.machine && view==="locations") {
+    machine = locate(button.dataset.machine);
+    return navigate("detail");
+  }
+  if (button.dataset.gridSlot && view==="detail") return openSpiral(button.dataset.gridSlot);
+  if (button.dataset.period && view==="sales") {
+    period = Number(button.dataset.period);
+    for (const choice of app.querySelectorAll("[data-period]")) {
+      choice.setAttribute("aria-pressed",String(Number(choice.dataset.period)===period));
+    }
+    app.querySelector("#sales-results").innerHTML = salesReport();
+    return;
+  }
+  const action = button.dataset.action;
+  if (view==="login" && action==="demo") return navigate("locations");
+  if (action==="login") {
+    search = "";
+    saleLocation = "";
+    period = 7;
+    return navigate("login");
+  }
+  if (action==="save") return save();
+  if (action==="close-spiral") return spiralDialog.close();
+  if (action==="full" && activeSpiral) return setQuantity(capacity,"full");
+  if (view!=="login" && ["locations","sales"].includes(action)) navigate(action);
+});
+app.addEventListener("input",event=>{
+  const input = event.target;
+  if (input.id==="search") {
+    search = input.value;
+    document.querySelector("#machine-list").innerHTML = locationList();
+  }
+  if (input.closest("#login-form")) app.querySelector("#login-error").textContent = "";
+});
+app.addEventListener("change",event=>{
+  if (event.target.id!=="sales-location") return;
+  saleLocation = event.target.value;
+  app.querySelector("#sales-results").innerHTML = salesReport();
+});
+app.addEventListener("submit",event=>{
+  if (event.target.id!=="login-form") return;
+  event.preventDefault();
+  const fields = new FormData(event.target);
+  const email = String(fields.get("email")).trim().toLowerCase();
+  if (email===demoAccount.email && fields.get("password")===demoAccount.password) return navigate("locations");
+  app.querySelector("#login-error").textContent = "Preveri e-pošto in geslo ali vstopi z vzorčnim računom.";
+});
+spiralDialog.addEventListener("input",event=>{
+  if (event.target.id!=="quantity") return;
+  spiralDialog.querySelector("#quantity-error").textContent = "";
+  event.target.removeAttribute("aria-invalid");
+});
+spiralDialog.addEventListener("submit",event=>{
+  event.preventDefault();
+  if (!activeSpiral) return;
+  const input = spiralDialog.querySelector("#quantity");
+  const value = input.value.trim();
+  if (!/^\d+$/.test(value) || Number(value)>capacity) {
+    spiralDialog.querySelector("#quantity-error").textContent = "Vnesite celo število od 0 do "+capacity+".";
+    input.setAttribute("aria-invalid","true");
+    return input.focus();
+  }
+  setQuantity(Number(value),"manual");
+});
+spiralDialog.addEventListener("close",()=>{
+  if (!spiralDialog.open) activeSpiral = null;
+});
+render();
+</script>
+</body>
+</html>
